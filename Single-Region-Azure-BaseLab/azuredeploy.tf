@@ -84,14 +84,11 @@ resource "azurerm_subnet_network_security_group_association" "vnet1-snet3" {
   subnet_id                 = azurerm_subnet.uks-vnet1-snet3.id
   network_security_group_id = azurerm_network_security_group.uks-nsg.id
 }
-resource "azurerm_subnet_network_security_group_association" "vnet2-snet1" {
-  subnet_id                 = azurerm_subnet.uks-vnet2-snet1.id
+resource "azurerm_subnet_network_security_group_association" "vnet1-snet4" {
+  subnet_id                 = azurerm_subnet.uks-vnet1-snet4.id
   network_security_group_id = azurerm_network_security_group.uks-nsg.id
 }
-resource "azurerm_subnet_network_security_group_association" "vnet2-snet2" {
-  subnet_id                 = azurerm_subnet.uks-vnet2-snet2.id
-  network_security_group_id = azurerm_network_security_group.uks-nsg.id
-}
+
 #Create KeyVault ID
 resource "random_id" "kvname" {
   byte_length = 5
@@ -221,19 +218,11 @@ resource "azurerm_windows_virtual_machine" "uks-dc01-vm" {
     version   = "latest"
   }
 }
-#Attach Data Disk to Virtual Machine
-resource "azurerm_virtual_machine_data_disk_attachment" "uks-dc01-data" {
-  managed_disk_id    = azurerm_managed_disk.uks-dc01-data.id
-  depends_on         = [azurerm_windows_virtual_machine.uks-dc01-vm]
-  virtual_machine_id = azurerm_windows_virtual_machine.uks-dc01-vm.id
-  lun                = "10"
-  caching            = "None"
-}
 #Run setup script on dc01-vm
 resource "azurerm_virtual_machine_extension" "uks-dc01-basesetup" {
   name                 = "uks-dc01-basesetup"
   virtual_machine_id   = azurerm_windows_virtual_machine.uks-dc01-vm.id
-  depends_on           = [azurerm_virtual_machine_data_disk_attachment.uks-dc01-data]
+  depends_on           = [azurerm_windows_virtual_machine.uks-dc01-data]
   publisher            = "Microsoft.Compute"
   type                 = "CustomScriptExtension"
   type_handler_version = "1.9"
