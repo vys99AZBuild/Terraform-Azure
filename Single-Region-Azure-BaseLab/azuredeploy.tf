@@ -173,21 +173,7 @@ resource "azurerm_network_interface" "uks-dc01-nic" {
     Function    = "core-activedirectory"
   }
 }
-#Create data disk for NTDS storage
-resource "azurerm_managed_disk" "uks-dc01-data" {
-  name                 = "uks-dc01-data"
-  location             = var.uks
-  resource_group_name  = azurerm_resource_group.rg1.name
-  storage_account_type = "StandardSSD_LRS"
-  create_option        = "Empty"
-  disk_size_gb         = "20"
-  max_shares           = "2"
 
-  tags = {
-    Environment = var.environment_tag
-    Function    = "core-activedirectory"
-  }
-}
 #Create Domain Controller VM
 resource "azurerm_windows_virtual_machine" "uks-dc01-vm" {
   name                = "uks-dc01-vm"
@@ -222,7 +208,7 @@ resource "azurerm_windows_virtual_machine" "uks-dc01-vm" {
 resource "azurerm_virtual_machine_extension" "uks-dc01-basesetup" {
   name                 = "uks-dc01-basesetup"
   virtual_machine_id   = azurerm_windows_virtual_machine.uks-dc01-vm.id
-  depends_on           = [azurerm_windows_virtual_machine.uks-dc01-data]
+  depends_on           = [azurerm_windows_virtual_machine.uks-dc01-vm]
   publisher            = "Microsoft.Compute"
   type                 = "CustomScriptExtension"
   type_handler_version = "1.9"
