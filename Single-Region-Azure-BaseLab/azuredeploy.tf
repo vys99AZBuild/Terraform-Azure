@@ -1,16 +1,7 @@
 #Resource Groups
 resource "azurerm_resource_group" "rg1" {
   name     = var.azure-rg-1
-  location = var.loc1
-  tags = {
-    Environment = var.environment_tag
-    Function    = "baselabv1-resourcegroups"
-  }
-}
-#Resource Groups
-resource "azurerm_resource_group" "rg2" {
-  name     = var.azure-rg-2
-  location = var.loc1
+  location = var.uks
   tags = {
     Environment = var.environment_tag
     Function    = "baselabv1-resourcegroups"
@@ -18,88 +9,40 @@ resource "azurerm_resource_group" "rg2" {
 }
 #VNETs and Subnets
 #Hub VNET and Subnets
-resource "azurerm_virtual_network" "region1-vnet1-hub1" {
-  name                = var.region1-vnet1-name
-  location            = var.loc1
+resource "azurerm_virtual_network" "uks-vnet1-hub1" {
+  name                = var.uks-vnet1-name
+  location            = var.uks
   resource_group_name = azurerm_resource_group.rg1.name
-  address_space       = [var.region1-vnet1-address-space]
-  dns_servers         = ["10.10.1.4", "168.63.129.16", "8.8.8.8"]
+  address_space       = [var.uks-vnet1-address-space]
+  dns_servers         = ["172.22.1.4", "168.63.129.16", "8.8.8.8"]
   tags = {
     Environment = var.environment_tag
-    Function    = "baselabv1-network"
+    Function    = "core-network"
   }
 }
-resource "azurerm_subnet" "region1-vnet1-snet1" {
-  name                 = var.region1-vnet1-snet1-name
+resource "azurerm_subnet" "uks-vnet1-snet1" {
+  name                 = var.uks-vnet1-snet1-name
   resource_group_name  = azurerm_resource_group.rg1.name
-  virtual_network_name = azurerm_virtual_network.region1-vnet1-hub1.name
-  address_prefixes     = [var.region1-vnet1-snet1-range]
+  virtual_network_name = azurerm_virtual_network.uks-vnet1-hub1.name
+  address_prefixes     = [var.uks-vnet1-snet1-range]
 }
-resource "azurerm_subnet" "region1-vnet1-snet2" {
-  name                 = var.region1-vnet1-snet2-name
+resource "azurerm_subnet" "uks-vnet1-snet2" {
+  name                 = var.uks-vnet1-snet2-name
   resource_group_name  = azurerm_resource_group.rg1.name
-  virtual_network_name = azurerm_virtual_network.region1-vnet1-hub1.name
-  address_prefixes     = [var.region1-vnet1-snet2-range]
+  virtual_network_name = azurerm_virtual_network.uks-vnet1-hub1.name
+  address_prefixes     = [var.uks-vnet1-snet2-range]
 }
-resource "azurerm_subnet" "region1-vnet1-snet3" {
-  name                 = var.region1-vnet1-snet3-name
+resource "azurerm_subnet" "uks-vnet1-snet3" {
+  name                 = var.uks-vnet1-snet3-name
   resource_group_name  = azurerm_resource_group.rg1.name
-  virtual_network_name = azurerm_virtual_network.region1-vnet1-hub1.name
-  address_prefixes     = [var.region1-vnet1-snet3-range]
+  virtual_network_name = azurerm_virtual_network.uks-vnet1-hub1.name
+  address_prefixes     = [var.uks-vnet1-snet3-range]
 }
-#Spoke VNET and Subnets 
-resource "azurerm_virtual_network" "region1-vnet2-spoke1" {
-  name                = var.region1-vnet2-name
-  location            = var.loc1
-  resource_group_name = azurerm_resource_group.rg1.name
-  address_space       = [var.region1-vnet2-address-space]
-  dns_servers         = ["10.10.1.4", "168.63.129.16", "8.8.8.8"]
-  tags = {
-    Environment = var.environment_tag
-    Function    = "baselabv1-network"
-  }
-}
-resource "azurerm_subnet" "region1-vnet2-snet1" {
-  name                 = var.region1-vnet2-snet1-name
+resource "azurerm_subnet" "uks-vnet1-snet4" {
+  name                 = var.uks-vnet1-snet4-name
   resource_group_name  = azurerm_resource_group.rg1.name
-  virtual_network_name = azurerm_virtual_network.region1-vnet2-spoke1.name
-  address_prefixes     = [var.region1-vnet2-snet1-range]
-}
-resource "azurerm_subnet" "region1-vnet2-snet2" {
-  name                 = var.region1-vnet2-snet2-name
-  resource_group_name  = azurerm_resource_group.rg1.name
-  virtual_network_name = azurerm_virtual_network.region1-vnet2-spoke1.name
-  address_prefixes     = [var.region1-vnet2-snet2-range]
-}
-resource "azurerm_subnet" "region1-vnet2-snet3" {
-  name                 = var.region1-vnet2-snet3-name
-  resource_group_name  = azurerm_resource_group.rg1.name
-  virtual_network_name = azurerm_virtual_network.region1-vnet2-spoke1.name
-  address_prefixes     = [var.region1-vnet2-snet3-range]
-  delegation {
-    name = "delegation"
-    service_delegation {
-      name    = "Microsoft.Netapp/volumes"
-      actions = ["Microsoft.Network/networkinterfaces/*", "Microsoft.Network/virtualNetworks/subnets/join/action"]
-    }
-  }
-}
-#VNET Peering
-resource "azurerm_virtual_network_peering" "peer1" {
-  name                         = "region1-vnet1-to-region1-vnet2"
-  resource_group_name          = azurerm_resource_group.rg1.name
-  virtual_network_name         = azurerm_virtual_network.region1-vnet1-hub1.name
-  remote_virtual_network_id    = azurerm_virtual_network.region1-vnet2-spoke1.id
-  allow_virtual_network_access = true
-  allow_forwarded_traffic      = true
-}
-resource "azurerm_virtual_network_peering" "peer2" {
-  name                         = "region1-vnet2-to-region1-vnet1"
-  resource_group_name          = azurerm_resource_group.rg1.name
-  virtual_network_name         = azurerm_virtual_network.region1-vnet2-spoke1.name
-  remote_virtual_network_id    = azurerm_virtual_network.region1-vnet1-hub1.id
-  allow_virtual_network_access = true
-  allow_forwarded_traffic      = true
+  virtual_network_name = azurerm_virtual_network.uks-vnet1-hub1.name
+  address_prefixes     = [var.uks-vnet1-snet4-range]
 }
 #RDP Access Rules for Lab
 #Get Client IP Address for NSG
@@ -107,10 +50,10 @@ data "http" "clientip" {
   url = "https://ipv4.icanhazip.com/"
 }
 #Lab NSG
-resource "azurerm_network_security_group" "region1-nsg" {
-  name                = "region1-nsg"
-  location            = var.loc1
-  resource_group_name = azurerm_resource_group.rg2.name
+resource "azurerm_network_security_group" "uks-nsg" {
+  name                = "uks-nsg"
+  location            = var.uks
+  resource_group_name = azurerm_resource_group.rg1.name
 
   security_rule {
     name                       = "RDP-In"
@@ -125,29 +68,29 @@ resource "azurerm_network_security_group" "region1-nsg" {
   }
   tags = {
     Environment = var.environment_tag
-    Function    = "baselabv1-security"
+    Function    = "core-security"
   }
 }
 #NSG Association to all Lab Subnets
 resource "azurerm_subnet_network_security_group_association" "vnet1-snet1" {
-  subnet_id                 = azurerm_subnet.region1-vnet1-snet1.id
-  network_security_group_id = azurerm_network_security_group.region1-nsg.id
+  subnet_id                 = azurerm_subnet.uks-vnet1-snet1.id
+  network_security_group_id = azurerm_network_security_group.uks-nsg.id
 }
 resource "azurerm_subnet_network_security_group_association" "vnet1-snet2" {
-  subnet_id                 = azurerm_subnet.region1-vnet1-snet2.id
-  network_security_group_id = azurerm_network_security_group.region1-nsg.id
+  subnet_id                 = azurerm_subnet.uks-vnet1-snet2.id
+  network_security_group_id = azurerm_network_security_group.uks-nsg.id
 }
 resource "azurerm_subnet_network_security_group_association" "vnet1-snet3" {
-  subnet_id                 = azurerm_subnet.region1-vnet1-snet3.id
-  network_security_group_id = azurerm_network_security_group.region1-nsg.id
+  subnet_id                 = azurerm_subnet.uks-vnet1-snet3.id
+  network_security_group_id = azurerm_network_security_group.uks-nsg.id
 }
 resource "azurerm_subnet_network_security_group_association" "vnet2-snet1" {
-  subnet_id                 = azurerm_subnet.region1-vnet2-snet1.id
-  network_security_group_id = azurerm_network_security_group.region1-nsg.id
+  subnet_id                 = azurerm_subnet.uks-vnet2-snet1.id
+  network_security_group_id = azurerm_network_security_group.uks-nsg.id
 }
 resource "azurerm_subnet_network_security_group_association" "vnet2-snet2" {
-  subnet_id                 = azurerm_subnet.region1-vnet2-snet2.id
-  network_security_group_id = azurerm_network_security_group.region1-nsg.id
+  subnet_id                 = azurerm_subnet.uks-vnet2-snet2.id
+  network_security_group_id = azurerm_network_security_group.uks-nsg.id
 }
 #Create KeyVault ID
 resource "random_id" "kvname" {
@@ -157,10 +100,10 @@ resource "random_id" "kvname" {
 #Keyvault Creation
 data "azurerm_client_config" "current" {}
 resource "azurerm_key_vault" "kv1" {
-  depends_on                  = [azurerm_resource_group.rg2]
+  depends_on                  = [azurerm_resource_group.rg1]
   name                        = random_id.kvname.hex
-  location                    = var.loc1
-  resource_group_name         = var.azure-rg-2
+  location                    = var.uks
+  resource_group_name         = var.azure-rg-1
   enabled_for_disk_encryption = true
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   soft_delete_retention_days  = 7
@@ -186,7 +129,7 @@ resource "azurerm_key_vault" "kv1" {
   }
   tags = {
     Environment = var.environment_tag
-    Function    = "baselabv1-security"
+    Function    = "core-security"
   }
 }
 #Create KeyVault VM password
@@ -202,41 +145,41 @@ resource "azurerm_key_vault_secret" "vmpassword" {
   depends_on   = [azurerm_key_vault.kv1]
 }
 #Public IP
-resource "azurerm_public_ip" "region1-dc01-pip" {
-  name                = "region1-dc01-pip"
+resource "azurerm_public_ip" "uks-dc01-pip" {
+  name                = "uks-dc01-pip"
   resource_group_name = azurerm_resource_group.rg1.name
-  location            = var.loc1
+  location            = var.uks
   allocation_method   = "Static"
   sku                 = "Standard"
 
   tags = {
     Environment = var.environment_tag
-    Function    = "baselabv1-activedirectory"
+    Function    = "core-activedirectory"
   }
 }
 #Create NIC and associate the Public IP
-resource "azurerm_network_interface" "region1-dc01-nic" {
-  name                = "region1-dc01-nic"
-  location            = var.loc1
+resource "azurerm_network_interface" "uks-dc01-nic" {
+  name                = "uks-dc01-nic"
+  location            = var.uks
   resource_group_name = azurerm_resource_group.rg1.name
 
 
   ip_configuration {
-    name                          = "region1-dc01-ipconfig"
-    subnet_id                     = azurerm_subnet.region1-vnet1-snet1.id
+    name                          = "uks-dc01-ipconfig"
+    subnet_id                     = azurerm_subnet.uks-vnet1-snet1.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.region1-dc01-pip.id
+    public_ip_address_id          = azurerm_public_ip.uks-dc01-pip.id
   }
 
   tags = {
     Environment = var.environment_tag
-    Function    = "baselabv1-activedirectory"
+    Function    = "core-activedirectory"
   }
 }
 #Create data disk for NTDS storage
-resource "azurerm_managed_disk" "region1-dc01-data" {
-  name                 = "region1-dc01-data"
-  location             = var.loc1
+resource "azurerm_managed_disk" "uks-dc01-data" {
+  name                 = "uks-dc01-data"
+  location             = var.uks
   resource_group_name  = azurerm_resource_group.rg1.name
   storage_account_type = "StandardSSD_LRS"
   create_option        = "Empty"
@@ -245,25 +188,25 @@ resource "azurerm_managed_disk" "region1-dc01-data" {
 
   tags = {
     Environment = var.environment_tag
-    Function    = "baselabv1-activedirectory"
+    Function    = "core-activedirectory"
   }
 }
 #Create Domain Controller VM
-resource "azurerm_windows_virtual_machine" "region1-dc01-vm" {
-  name                = "region1-dc01-vm"
+resource "azurerm_windows_virtual_machine" "uks-dc01-vm" {
+  name                = "uks-dc01-vm"
   depends_on          = [azurerm_key_vault.kv1]
   resource_group_name = azurerm_resource_group.rg1.name
-  location            = var.loc1
+  location            = var.uks
   size                = var.vmsize-domaincontroller
   admin_username      = var.adminusername
   admin_password      = azurerm_key_vault_secret.vmpassword.value
   network_interface_ids = [
-    azurerm_network_interface.region1-dc01-nic.id,
+    azurerm_network_interface.uks-dc01-nic.id,
   ]
 
   tags = {
     Environment = var.environment_tag
-    Function    = "baselabv1-activedirectory"
+    Function    = "core-activedirectory"
   }
 
   os_disk {
@@ -279,18 +222,18 @@ resource "azurerm_windows_virtual_machine" "region1-dc01-vm" {
   }
 }
 #Attach Data Disk to Virtual Machine
-resource "azurerm_virtual_machine_data_disk_attachment" "region1-dc01-data" {
-  managed_disk_id    = azurerm_managed_disk.region1-dc01-data.id
-  depends_on         = [azurerm_windows_virtual_machine.region1-dc01-vm]
-  virtual_machine_id = azurerm_windows_virtual_machine.region1-dc01-vm.id
+resource "azurerm_virtual_machine_data_disk_attachment" "uks-dc01-data" {
+  managed_disk_id    = azurerm_managed_disk.uks-dc01-data.id
+  depends_on         = [azurerm_windows_virtual_machine.uks-dc01-vm]
+  virtual_machine_id = azurerm_windows_virtual_machine.uks-dc01-vm.id
   lun                = "10"
   caching            = "None"
 }
 #Run setup script on dc01-vm
-resource "azurerm_virtual_machine_extension" "region1-dc01-basesetup" {
-  name                 = "region1-dc01-basesetup"
-  virtual_machine_id   = azurerm_windows_virtual_machine.region1-dc01-vm.id
-  depends_on           = [azurerm_virtual_machine_data_disk_attachment.region1-dc01-data]
+resource "azurerm_virtual_machine_extension" "uks-dc01-basesetup" {
+  name                 = "uks-dc01-basesetup"
+  virtual_machine_id   = azurerm_windows_virtual_machine.uks-dc01-vm.id
+  depends_on           = [azurerm_virtual_machine_data_disk_attachment.uks-dc01-data]
   publisher            = "Microsoft.Compute"
   type                 = "CustomScriptExtension"
   type_handler_version = "1.9"
@@ -304,7 +247,7 @@ resource "azurerm_virtual_machine_extension" "region1-dc01-basesetup" {
   settings = <<SETTINGS
     {
         "fileUris": [
-          "https://raw.githubusercontent.com/jakewalsh90/Terraform-Azure/main/Single-Region-Azure-BaseLab/PowerShell/baselab_DCSetup.ps1"
+          "https://raw.githubusercontent.com/vys99AZBuild/Terraform-Azure/main/Single-Region-Azure-BaseLab/PowerShell/baselab_DCSetup.ps1"
         ]
     }
   SETTINGS
