@@ -3,7 +3,7 @@ Install-ADDSForest `
 -CreateDnsDelegation:$false `
 -DatabasePath "C:\windows\NTDS" `
 -DomainMode "WinThreshold" `
--DomainName "fmc.cloudlab.com" `
+-DomainName "fmc.vysiioncloudlab.co.uk" `
 -DomainNetbiosName "fmc" `
 -ForestMode "WinThreshold" `
 -InstallDns:$true `

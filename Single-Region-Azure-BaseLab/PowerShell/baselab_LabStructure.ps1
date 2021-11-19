@@ -1,6 +1,6 @@
 #Setup Variables
-$DCRoot = "DC=fmc,DC=cloudlab,DC=com"
-$LabDCRoot = "OU=Azure,DC=fmc,DC=cloudlab,DC=comb"
+$DCRoot = "DC=fmc,DC=vysiioncloudlab,DC=co,DC=uk"
+$LabDCRoot = "DC=fmc,DC=vysiioncloudlab,DC=co,DC=uk"
 #Create Root Lab OU
 New-ADOrganizationalUnit -Name "Azure" -Path $DCRoot -ProtectedFromAccidentalDeletion $False -Description "FMC Lab Environment"
 #Create Other OUs
